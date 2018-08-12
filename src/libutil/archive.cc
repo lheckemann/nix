@@ -297,18 +297,19 @@ void parseDump(ParseSink & sink, Source & source)
 struct RestoreSink : ParseSink
 {
     Path dstPath;
+    Path p;
     AutoCloseFD fd;
 
     void createDirectory(const Path & path)
     {
-        Path p = dstPath + path;
+        p = dstPath + path;
         if (mkdir(p.c_str(), 0777) == -1)
             throw SysError(format("creating directory '%1%'") % p);
     };
 
     void createRegularFile(const Path & path)
     {
-        Path p = dstPath + path;
+        p = dstPath + path;
         fd = open(p.c_str(), O_CREAT | O_EXCL | O_WRONLY | O_CLOEXEC, 0666);
         if (!fd) throw SysError(format("creating file '%1%'") % p);
     }
@@ -332,7 +333,7 @@ struct RestoreSink : ParseSink
                OpenSolaris).  Since preallocation is just an
                optimisation, ignore it. */
             if (errno && errno != EINVAL)
-                throw SysError(format("preallocating file of %1% bytes") % len);
+                throw SysError(format("preallocating file %1% of %2% bytes") % p % len);
         }
 #endif
     }
